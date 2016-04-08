@@ -113,24 +113,20 @@ public class WorkspaceAgentController {
 	@Produces({"text/html", "application/json"})
 	@ResponseStatus(value = HttpStatus.CREATED)
 	@RequestMapping(value="/compile", method = RequestMethod.POST)
-    public @ResponseBody JSONObject compileProject(@RequestBody JSONObject o) {
+    public  @ResponseBody JSONObject compileProject(@RequestBody JSONObject o) {
     	
-    	String domainName = "google.com";
+    	// the dir has to be changed to generic folder in docker container like /home/user/workspace
     	
+    	String dir = "/home/pripawar/git/CloudEnabledDevAgent" + o.get("projectName").toString();
     	
-		
-			
-		//in windows
-		//String command = "ping -n 3 " + domainName;
-    	
-    	//String[] command = {"ping -n 3 " + domainName, "cd D:\\classdocs\\295B\\CloudEnabledDevelopment-master\\CloudEnabledDevelopment", "dir"};
-    	String command = "D:\\classdocs\\295B\\workspace\\CloudEnabledDevAgent\\src\\main\\java\\hello\\script.sh";
+    	String[] command = {"/home/pripawar/git/CloudEnabledDevAgent/script.sh",dir};
 		
 		String output = executeCommand(command);
 
 		System.out.println(output);
+		System.out.println("command exec completed");
 		
-		
+		//return output;
 
     	JSONObject data_file = new JSONObject();
         data_file.put("output", output);
@@ -147,7 +143,7 @@ public class WorkspaceAgentController {
 //                            String.format(template, name));
 //    }
     
-    private String executeCommand(String command) {
+    private String executeCommand(String[] command) {
 
 		StringBuffer output = new StringBuffer();
 

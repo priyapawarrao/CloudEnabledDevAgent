@@ -1,3 +1,3 @@
 #!/bin/bash
-cd D:\\classdocs\\295B\\CloudEnabledDevelopment-master\\CloudEnabledDevelopment
-dir
+cd /home/pripawar/git/CloudEnabledDevAgent
+ls
