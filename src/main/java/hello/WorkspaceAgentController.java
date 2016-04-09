@@ -39,8 +39,7 @@ public class WorkspaceAgentController {
     	String name = o.get("name").toString();
     	String content = o.get("content").toString();
     	String path = o.get("path").toString();
-    	
-    	
+    	String type = o.get("fileType").toString();
     	
     	byte[] bytes = Base64.decode(content);
         File srcFile = new File(name);
@@ -58,10 +57,8 @@ public class WorkspaceAgentController {
 			e.printStackTrace();
 		}
         
-        
-    	
-    	String absoluteFilePath = path + File.separator + name;
- 	   	File destFile = new File(absoluteFilePath);
+        String absoluteFilePath = path + File.separator + name;
+    	File destFile = new File(absoluteFilePath);
     	
     	try {
 			FileUtils.copyFile(srcFile, destFile);
@@ -70,6 +67,13 @@ public class WorkspaceAgentController {
 			status = "File copy failed: " + e.getMessage();
 			e.printStackTrace();
 		}
+    	
+    	if(type.equalsIgnoreCase("folder"))
+    	{
+    		String command = "unzip -o " + path + File.separator + name;
+    		String output = executeCommand(command);
+    	}
+    	
     	    	
     	JSONObject obj = new JSONObject();
         obj.put("result", status);
@@ -88,8 +92,18 @@ public class WorkspaceAgentController {
     	
     	String name = o.get("name").toString();
     	String path = o.get("path").toString();
+    	String type = o.get("fileType").toString();
     	
-    	String absoluteFilePath = path + File.separator + name;
+    	String absoluteFilePath = path + File.separator ;
+    	
+    	if(type.equalsIgnoreCase("folder"))
+    	{
+    		// cd to the location zip and then the same 
+    	
+    	}else
+	    	{
+	    	absoluteFilePath = path + File.separator + name;
+	    	}
  	   	File srcFile = new File(absoluteFilePath);
     	
     	byte[] bytes = null;
@@ -165,6 +179,29 @@ public class WorkspaceAgentController {
 		return output.toString();
 
 	}
+    
+    private String executeCommand(String command) {
+
+  		StringBuffer output = new StringBuffer();
+
+  		Process p;
+  		try {
+  			p = Runtime.getRuntime().exec(command);
+  			p.waitFor();
+  			BufferedReader reader = new BufferedReader(new InputStreamReader(p.getInputStream()));
+  			
+  			String line = "";			
+  			while ((line = reader.readLine())!= null) {
+  				output.append(line + "\n");
+  			}
+
+  		} catch (Exception e) {
+  			e.printStackTrace();
+  		}
+
+  		return output.toString();
+
+  	}
     
     private String executeMultipleCommands(String[] commands) {
     	

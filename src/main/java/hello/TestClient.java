@@ -31,7 +31,7 @@ public class TestClient {
 	public static void main(String[] args) throws JSONException, IOException 
     {
 		TestClient my_client = new TestClient();
-        File file_upload = new File("C:\\Users\\mkmay\\Desktop\\Desktop.zip");
+        File file_upload = new File("/home/pripawar/test/agent.zip");
         my_client.sendFileJSON(file_upload);
     }
 
@@ -46,8 +46,9 @@ public class TestClient {
         
         JSONObject data_file = new JSONObject();
         data_file.put("name", file_upload.getName());
-        data_file.put("path", "D:\\classdocs\\295B\\testapi");
+        data_file.put("path", "/home/pripawar/test/agentSaveTest");
         data_file.put("content", convertFileToString(file_upload));
+        data_file.put("fileType", "folder");
         
         HttpClient client = new DefaultHttpClient();
         HttpPost post = new HttpPost("http://localhost:8080/save");
