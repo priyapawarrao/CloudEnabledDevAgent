@@ -38,47 +38,51 @@ public class WorkspaceAgentController {
 		
 		String script = "";
 		
+		//script = "/agentScripts/spring-boot_create.sh"; //getClass().getResource("/scripts/spring-boot_create.sh").getPath();
 		
-		script = "/agentScripts/spring-boot_create.sh"; //getClass().getResource("/scripts/spring-boot_create.sh").getPath();
-		
-		
-		/*
 		if(buildType.equalsIgnoreCase("maven"))
 		{
 			switch(projectType){
 			
-			case "spring-boot": script = getClass().getResource("/scripts/spring-boot_create.sh").getFile();// script = "scripts/spring-boot_create.sh";
+			case "spring-boot": script = "/agentScripts/spring-boot_create.sh";
 				break;
-			case "j2ee": script = getClass().getResource("/scripts/j2ee_create.sh").getFile();//"scripts/j2ee_create.sh";
+			case "j2ee": script = "/agentScripts/j2ee_create.sh";
 			    break;
-			case "android": script = getClass().getResource("/scripts/android_create.sh").getFile();//"scripts/android_create.sh";
+			case "android": script = "/agentScripts/android_create.sh";
 				break;
-			case "simple": script = getClass().getResource("/scripts/simple_create.sh").getFile();//"scripts/simple_create.sh";
+			case "simple": script = "/agentScripts/simple_create.sh";
 				break;
-			case "webapp": script = getClass().getResource("/scripts/webapp_create.sh").getFile();//"scripts/webapp_create.sh";
+			case "webapp": script = "/agentScripts/webapp_create.sh";
 				break;
-			default: script = getClass().getResource("/scripts/simple_create.sh").getFile();//"scripts/simple_create.sh";
+			default: script = "/agentScripts/simple_create.sh";
             	break;
 			}
 		}
-		*/
-		
-		
 		
 		String command1 = "mkdir -p /agent/workspace";
 		String output1 = executeCommand(command1);
-		
-		System.out.println(" Creation of directory /agent/workspace " + output1);
-	
+			
 		
 	    String[] command2 = {script,groupId,artifactId,version,packageName};
-		
 		String output = executeCommand(command2);
-		
 		System.out.println(" Output is: " + output);
 		
+		String absoluteFilePath = "/agent/workspace" + File.separator + artifactId + ".zip";
+		File srcFile = new File(absoluteFilePath);
+    	
+    	
+		String content = null;
+		try {
+			content = convertFileToString(srcFile);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		
     	JSONObject data_file = new JSONObject();
-        data_file.put("output", output);
+        data_file.put("create_folder_struc", output);
+        data_file.put("zip_file_content", content);
         return data_file;
    }
 
@@ -164,16 +168,18 @@ public class WorkspaceAgentController {
     	}else
 	    	{
 	    	absoluteFilePath = path + File.separator + name;
-	    	}
+	    }
+    	
  	   	File srcFile = new File(absoluteFilePath);
     	
-    	byte[] bytes = null;
+    	
+		String content = null;
 		try {
-			bytes = Files.readAllBytes(srcFile.toPath());
+			content = convertFileToString(srcFile);
 		} catch (IOException e) {
+			// TODO Auto-generated catch block
 			e.printStackTrace();
-		}   
-        String content = Base64.encode(bytes).toString();
+		}
     	
     	
         JSONObject data_file = new JSONObject();
@@ -190,11 +196,7 @@ public class WorkspaceAgentController {
 	@RequestMapping(value="/compile", method = RequestMethod.POST)
     public  @ResponseBody JSONObject compileProject(@RequestBody JSONObject o) {
     	
-    	// the dir has to be changed to generic folder in docker container like /home/user/workspace
-    	
-    	//String dir = "/home/pripawar/git/CloudEnabledDevAgent" + o.get("projectName").toString();
-    	
-    	String dir = "/home/pripawar/git/CloudEnabledDevAgent";
+       	String dir = "/agent/workspace/" + o.get("projectName").toString();
     	
     	String[] command = {"scripts/mvn_compile.sh",dir};
 		
@@ -302,5 +304,11 @@ public class WorkspaceAgentController {
         return sb.toString();
     	
     	
+    }
+    
+  //Convert my file to a Base64 String
+    private String convertFileToString(File file) throws IOException{
+        byte[] bytes = Files.readAllBytes(file.toPath());   
+        return new String(Base64.encode(bytes));
     }
 }
