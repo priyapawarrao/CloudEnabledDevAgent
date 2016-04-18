@@ -25,7 +25,7 @@ public class WorkspaceAgentController {
 	@Produces({"text/html", "application/json"})
 	@ResponseStatus(value = HttpStatus.CREATED)
 	@RequestMapping(value="/create", method = RequestMethod.POST)
-    public  @ResponseBody JSONObject createProject(@RequestBody JSONObject o) {
+    public  @ResponseBody String createProject(@RequestBody JSONObject o) {
     	
 		String projectType = o.get("projectType").toString();
 		String buildType = o.get("buildType").toString();
@@ -80,10 +80,12 @@ public class WorkspaceAgentController {
 		}
 		
 		
-    	JSONObject data_file = new JSONObject();
-        data_file.put("create_folder_struc", output);
-        data_file.put("zip_file_content", content);
-        return data_file;
+//    	JSONObject data_file = new JSONObject();
+//        //data_file.put("create_folder_struc", output);
+//        data_file.put("zip_file_content", content);
+//        return data_file;
+        
+        return content;
    }
 
    
@@ -198,7 +200,7 @@ public class WorkspaceAgentController {
     	
        	String dir = "/agent/workspace/" + o.get("projectName").toString();
     	
-    	String[] command = {"scripts/mvn_compile.sh",dir};
+    	String[] command = {"/agentScripts/mvn_compile.sh",dir};
 		
 		String output = executeCommand(command);
 
