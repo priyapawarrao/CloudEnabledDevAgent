@@ -11,6 +11,8 @@ import java.nio.file.Files;
 import javax.ws.rs.*;
 
 import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import org.apache.commons.io.*;
@@ -25,7 +27,7 @@ public class WorkspaceAgentController {
 	@Produces({"text/html", "application/json"})
 	@ResponseStatus(value = HttpStatus.CREATED)
 	@RequestMapping(value="/create", method = RequestMethod.POST)
-    public  @ResponseBody String createProject(@RequestBody JSONObject o) {
+    public  @ResponseBody JSONObject createProject(@RequestBody JSONObject o) {
     	
 		String projectType = o.get("projectType").toString();
 		String buildType = o.get("buildType").toString();
@@ -67,25 +69,37 @@ public class WorkspaceAgentController {
 		String output = executeCommand(command2);
 		System.out.println(" Output is: " + output);
 		
-		String absoluteFilePath = "/agent/workspace" + File.separator + artifactId + ".zip";
-		File srcFile = new File(absoluteFilePath);
-    	
-    	
-		String content = null;
+		String[] command3 = {"/agentScripts/create_json.sh",artifactId};
+		String output3 = executeCommand(command3);
+		
+		JSONParser parser = new JSONParser();
+		JSONObject json = null;
 		try {
-			content = convertFileToString(srcFile);
-		} catch (IOException e) {
+			json = (JSONObject) parser.parse(output3);
+		} catch (ParseException e1) {
 			// TODO Auto-generated catch block
-			e.printStackTrace();
+			e1.printStackTrace();
 		}
 		
-		
+//		String absoluteFilePath = "/agent/workspace" + File.separator + artifactId + ".json";
+//		File srcFile = new File(absoluteFilePath);
+//    	
+//    	
+//		String content = null;
+//		try {
+//			content = convertFileToString(srcFile);
+//		} catch (IOException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		}
+//		
+//		
 //    	JSONObject data_file = new JSONObject();
 //        //data_file.put("create_folder_struc", output);
-//        data_file.put("zip_file_content", content);
-//        return data_file;
+////        data_file.put("zip_file_content", content);
+////        return data_file;
         
-        return content;
+        return json;
    }
 
    
@@ -155,41 +169,54 @@ public class WorkspaceAgentController {
 	@RequestMapping(value="/load", method = RequestMethod.POST)
     public @ResponseBody JSONObject loadProject(@RequestBody JSONObject o) {
     	
- 	  	String status;
+// 	  	String status;
+//    	
+//    	String name = o.get("name").toString();
+//    	String path = o.get("path").toString();
+//    	String type = o.get("fileType").toString();
+//    	
+//    	String absoluteFilePath = path + File.separator ;
+//    	
+//    	if(type.equalsIgnoreCase("folder"))
+//    	{
+//    		// cd to the location zip and then the same 
+//    	
+//    	}else
+//	    	{
+//	    	absoluteFilePath = path + File.separator + name;
+//	    }
+//    	
+// 	   	File srcFile = new File(absoluteFilePath);
+//    	
+//    	
+//		String content = null;
+//		try {
+//			content = convertFileToString(srcFile);
+//		} catch (IOException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		}
+//    	
+//        JSONObject data_file = new JSONObject();
+//        data_file.put("name", name);
+//        data_file.put("path", path);
+//        data_file.put("content", content);
     	
-    	String name = o.get("name").toString();
-    	String path = o.get("path").toString();
-    	String type = o.get("fileType").toString();
+    	String projectName = o.get("projectName").toString();
     	
-    	String absoluteFilePath = path + File.separator ;
-    	
-    	if(type.equalsIgnoreCase("folder"))
-    	{
-    		// cd to the location zip and then the same 
-    	
-    	}else
-	    	{
-	    	absoluteFilePath = path + File.separator + name;
-	    }
-    	
- 	   	File srcFile = new File(absoluteFilePath);
-    	
-    	
-		String content = null;
+    	String[] command3 = {"/agentScripts/create_json.sh",projectName};
+		String output3 = executeCommand(command3);
+		
+		JSONParser parser = new JSONParser();
+		JSONObject json = null;
 		try {
-			content = convertFileToString(srcFile);
-		} catch (IOException e) {
+			json = (JSONObject) parser.parse(output3);
+		} catch (ParseException e1) {
 			// TODO Auto-generated catch block
-			e.printStackTrace();
+			e1.printStackTrace();
 		}
-    	
-    	
-        JSONObject data_file = new JSONObject();
-        data_file.put("name", name);
-        data_file.put("path", path);
-        data_file.put("content", content);
-
-        return data_file;
+    	 
+		return json;
     }
     
     @Consumes({"application/xml", "application/json","text/html"})
