@@ -27,7 +27,7 @@ public class WorkspaceAgentController {
 	@Produces({"text/html", "application/json"})
 	@ResponseStatus(value = HttpStatus.CREATED)
 	@RequestMapping(value="/create", method = RequestMethod.POST)
-    public  @ResponseBody JSONObject createProject(@RequestBody JSONObject o) {
+    public  @ResponseBody String createProject(@RequestBody JSONObject o) {
     	
 		String projectType = o.get("projectType").toString();
 		String buildType = o.get("buildType").toString();
@@ -70,16 +70,18 @@ public class WorkspaceAgentController {
 		System.out.println(" Output is: " + output);
 		
 		String[] command3 = {"/agentScripts/create_json.sh",artifactId};
-		String output3 = executeCommand(command3);
+		String json = executeCommand(command3);
 		
-		JSONParser parser = new JSONParser();
-		JSONObject json = null;
-		try {
-			json = (JSONObject) parser.parse(output3);
-		} catch (ParseException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
-		}
+		System.out.println("JSON string format: " + json);
+		
+//		JSONParser parser = new JSONParser();
+//		JSONObject json = null;
+//		try {
+//			json = (JSONObject) parser.parse(output3);
+//		} catch (ParseException e1) {
+//			// TODO Auto-generated catch block
+//			e1.printStackTrace();
+//		}
 		
 //		String absoluteFilePath = "/agent/workspace" + File.separator + artifactId + ".json";
 //		File srcFile = new File(absoluteFilePath);
@@ -99,24 +101,20 @@ public class WorkspaceAgentController {
 ////        data_file.put("zip_file_content", content);
 ////        return data_file;
         
-        return json;
+//		JSONObject json = new JSONObject();
+//		json.put("JSON", output3);
+		
+		return json;
    }
 
    
     @Consumes({"application/xml", "application/json","text/html"})
 	@Produces({"text/html", "application/json"})
 	@ResponseStatus(value = HttpStatus.CREATED)
-	@RequestMapping(value="/save", method = RequestMethod.POST)
-    public @ResponseBody JSONObject saveProject(@RequestBody JSONObject o) {
-    	
-    	//FileObject f  = new FileObject(o.get("name").toString(),o.get("content").toString(),o.get("path").toString());
-    	//f.setName(o.get("name").toString());
-    	//f.setPath(o.get("path").toString());
-    	//f.setContent((File) o.get("content"));
-    	
-    	
+	@RequestMapping(value="/saveFile", method = RequestMethod.POST)
+    public @ResponseBody JSONObject saveFile(@RequestBody JSONObject o) {
+    
     	String status;
-    	
     	String name = o.get("name").toString();
     	String content = o.get("content").toString();
     	String path = o.get("path").toString();
@@ -143,9 +141,9 @@ public class WorkspaceAgentController {
     	
     	try {
 			FileUtils.copyFile(srcFile, destFile);
-			status = "success";
+			status = "SUCCESS";
 		} catch (IOException e) {
-			status = "File copy failed: " + e.getMessage();
+			status = "FAIL " + e.getMessage();
 			e.printStackTrace();
 		}
     	
@@ -162,62 +160,109 @@ public class WorkspaceAgentController {
     }
     
     // Loads a file from disk, returns a encoded string.
-    
     @Consumes({"application/xml", "application/json","text/html"})
 	@Produces({"text/html", "application/json"})
 	@ResponseStatus(value = HttpStatus.CREATED)
-	@RequestMapping(value="/load", method = RequestMethod.POST)
-    public @ResponseBody JSONObject loadProject(@RequestBody JSONObject o) {
+	@RequestMapping(value="/loadFile", method = RequestMethod.POST)
+    public @ResponseBody JSONObject loadFile(@RequestBody JSONObject o) {
     	
-// 	  	String status;
-//    	
-//    	String name = o.get("name").toString();
-//    	String path = o.get("path").toString();
-//    	String type = o.get("fileType").toString();
-//    	
-//    	String absoluteFilePath = path + File.separator ;
-//    	
-//    	if(type.equalsIgnoreCase("folder"))
-//    	{
-//    		// cd to the location zip and then the same 
-//    	
-//    	}else
-//	    	{
-//	    	absoluteFilePath = path + File.separator + name;
-//	    }
-//    	
-// 	   	File srcFile = new File(absoluteFilePath);
-//    	
-//    	
-//		String content = null;
-//		try {
-//			content = convertFileToString(srcFile);
-//		} catch (IOException e) {
-//			// TODO Auto-generated catch block
-//			e.printStackTrace();
-//		}
-//    	
-//        JSONObject data_file = new JSONObject();
-//        data_file.put("name", name);
-//        data_file.put("path", path);
-//        data_file.put("content", content);
+    	String name = o.get("name").toString();
+    	String path = o.get("path").toString();
     	
-    	String projectName = o.get("projectName").toString();
+    	
+    	String absoluteFilePath = path + File.separator ;
+    	absoluteFilePath = path + File.separator + name;
+    	
+ 	   	File srcFile = new File(absoluteFilePath);
+    	
+    	
+		String content = null;
+		try {
+			content = convertFileToString(srcFile);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+    	
+        JSONObject data_file = new JSONObject();
+        data_file.put("name", name);
+        data_file.put("path", path);
+        data_file.put("content", content);
+    	
+        return data_file;
+    }
+    
+    
+    // Loads project, Input: project Name, Output: JSON of the project in string format
+    @Consumes({"application/xml", "application/json","text/html"})
+	@Produces({"text/html", "application/json"})
+	@ResponseStatus(value = HttpStatus.CREATED)
+	@RequestMapping(value="/loadProject", method = RequestMethod.POST)
+    public @ResponseBody String loadProject(@RequestBody JSONObject o) {
+
+       	String projectName = o.get("projectName").toString();
     	
     	String[] command3 = {"/agentScripts/create_json.sh",projectName};
-		String output3 = executeCommand(command3);
-		
-		JSONParser parser = new JSONParser();
-		JSONObject json = null;
-		try {
-			json = (JSONObject) parser.parse(output3);
-		} catch (ParseException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
-		}
-    	 
-		return json;
+		String json = executeCommand(command3);
+	
+    	return json;
     }
+    
+    @Consumes({"application/xml", "application/json","text/html"})
+   	@Produces({"text/html", "application/json"})
+   	@ResponseStatus(value = HttpStatus.CREATED)
+   	@RequestMapping(value="/createFile", method = RequestMethod.POST)
+       public @ResponseBody Boolean createFile(@RequestBody JSONObject o) {
+
+    	Boolean status = null;
+    	String name = o.get("name").toString();
+    	String path = o.get("path").toString();
+    	
+    	String absoluteFilePath = path + File.separator + name;
+    	
+    	File srcFile = new File(absoluteFilePath);
+    	
+    	
+    	if (srcFile.exists()) {
+            System.out.println("File already exists");
+        } else {
+        	try {
+				status = srcFile.createNewFile();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+        }
+    	
+    	return status;
+    	
+   }
+    
+    @Consumes({"application/xml", "application/json","text/html"})
+   	@Produces({"text/html", "application/json"})
+   	@ResponseStatus(value = HttpStatus.CREATED)
+   	@RequestMapping(value="/createFolder", method = RequestMethod.POST)
+       public @ResponseBody Boolean createFolder(@RequestBody JSONObject o) {
+
+    	Boolean status = null;
+    	String name = o.get("name").toString();
+    	String path = o.get("path").toString();
+    	
+    	String absoluteFilePath = path + File.separator + name;
+    	File directory = new File(absoluteFilePath);
+    	
+    	if (directory.exists()) {
+            System.out.println("Folder already exists");
+        } else {
+        	status = directory.mkdir();
+        }
+
+    return status;
+    	
+   }
+    
+    
+    
     
     @Consumes({"application/xml", "application/json","text/html"})
 	@Produces({"text/html", "application/json"})
