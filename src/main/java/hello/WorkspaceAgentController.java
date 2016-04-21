@@ -25,6 +25,14 @@ public class WorkspaceAgentController {
 	
 	@Consumes({"application/xml", "application/json","text/html"})
 	@Produces({"text/html", "application/json"})
+	@RequestMapping(value="/check", method = RequestMethod.GET)
+    public  @ResponseBody String checkREST() {
+		return "UP";
+	}
+	
+	
+	@Consumes({"application/xml", "application/json","text/html"})
+	@Produces({"text/html", "application/json"})
 	@ResponseStatus(value = HttpStatus.CREATED)
 	@RequestMapping(value="/create", method = RequestMethod.POST)
     public  @ResponseBody String createProject(@RequestBody JSONObject o) {
@@ -359,7 +367,7 @@ public class WorkspaceAgentController {
 
 		Process p;
 		try {
-			p = Runtime.getRuntime().exec(command);
+			p = Runtime.getRuntime().exec("bash -c " + command);
 			p.waitFor();
 			BufferedReader reader = new BufferedReader(new InputStreamReader(p.getInputStream()));
 			
@@ -367,6 +375,12 @@ public class WorkspaceAgentController {
 			while ((line = reader.readLine())!= null) {
 				output.append(line + "\n");
 			}
+			
+			BufferedReader readErrorProc=new BufferedReader(new InputStreamReader(p.getErrorStream()));
+		      while(readErrorProc.ready()) {
+		        String output1 = readErrorProc.readLine();
+		        System.out.println("Error while compiling: " + output1);
+		      }
 
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -382,7 +396,8 @@ public class WorkspaceAgentController {
 
   		Process p;
   		try {
-  			p = Runtime.getRuntime().exec(command);
+  			//p = Runtime.getRuntime().exec(command);
+  			p = Runtime.getRuntime().exec(new String[] { "bash", "-c", command });
   			p.waitFor();
   			BufferedReader reader = new BufferedReader(new InputStreamReader(p.getInputStream()));
   			
