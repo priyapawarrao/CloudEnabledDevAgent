@@ -367,7 +367,7 @@ public class WorkspaceAgentController {
 
 		Process p;
 		try {
-			p = Runtime.getRuntime().exec("bash -c " + command);
+			p = Runtime.getRuntime().exec(command);
 			p.waitFor();
 			BufferedReader reader = new BufferedReader(new InputStreamReader(p.getInputStream()));
 			
@@ -396,8 +396,7 @@ public class WorkspaceAgentController {
 
   		Process p;
   		try {
-  			//p = Runtime.getRuntime().exec(command);
-  			p = Runtime.getRuntime().exec(new String[] { "bash", "-c", command });
+  			p = Runtime.getRuntime().exec(command);
   			p.waitFor();
   			BufferedReader reader = new BufferedReader(new InputStreamReader(p.getInputStream()));
   			
