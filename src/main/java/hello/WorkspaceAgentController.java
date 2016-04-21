@@ -33,14 +33,16 @@ public class WorkspaceAgentController {
 		String buildType = o.get("buildType").toString();
 				
 		
-		String groupId = o.get("groupId").toString();
+		String groupId = "com.cloud.core";
 		String artifactId = o.get("projectName").toString();
-		String version = o.get("version").toString();
-		String packageName = o.get("packageName").toString();
+		String version = "1.0";
+		String packageName = "com.cloud.core.dev";
 		
 		String script = "";
 		
 		//script = "/agentScripts/spring-boot_create.sh"; //getClass().getResource("/scripts/spring-boot_create.sh").getPath();
+		
+		Boolean empty = false;
 		
 		if(buildType.equalsIgnoreCase("maven"))
 		{
@@ -48,13 +50,16 @@ public class WorkspaceAgentController {
 			
 			case "spring-boot": script = "/agentScripts/spring-boot_create.sh";
 				break;
-			case "j2ee": script = "/agentScripts/j2ee_create.sh";
+			case "j2ee-project": script = "/agentScripts/j2ee_create.sh";
 			    break;
-			case "android": script = "/agentScripts/android_create.sh";
+			case "android-project": script = "/agentScripts/android_create.sh";
 				break;
-			case "simple": script = "/agentScripts/simple_create.sh";
+			case "java-project": script = "/agentScripts/simple_create.sh";
 				break;
-			case "webapp": script = "/agentScripts/webapp_create.sh";
+			case "webapp-project": script = "/agentScripts/webapp_create.sh";
+				break;
+			case "empty-project": script = "/agentScripts/empty_create.sh";
+								empty =true;
 				break;
 			default: script = "/agentScripts/simple_create.sh";
             	break;
@@ -63,10 +68,18 @@ public class WorkspaceAgentController {
 		
 		String command1 = "mkdir -p /agent/workspace";
 		String output1 = executeCommand(command1);
-			
 		
-	    String[] command2 = {script,groupId,artifactId,version,packageName};
-		String output = executeCommand(command2);
+		String output;
+			
+		if(empty){
+			String[]  command2 = {script,artifactId};
+			output = executeCommand(command2);
+			
+		}else {
+			String[]  command2 = {script,groupId,artifactId,version,packageName};
+			output = executeCommand(command2);
+		}
+		
 		System.out.println(" Output is: " + output);
 		
 		String[] command3 = {"/agentScripts/create_json.sh",artifactId};
@@ -285,6 +298,50 @@ public class WorkspaceAgentController {
         data_file.put("output", output);
         return data_file;
    }
+    
+    @Consumes({"application/xml", "application/json","text/html"})
+   	@Produces({"text/html", "application/json"})
+   	@ResponseStatus(value = HttpStatus.CREATED)
+   	@RequestMapping(value="/execute", method = RequestMethod.POST)
+    public  @ResponseBody JSONObject executeProject(@RequestBody JSONObject o) {
+       	
+        String dir = "/agent/workspace/" + o.get("projectName").toString();
+       	
+       	String[] command = {"/agentScripts/mvn_execute.sh",dir};
+   		
+   		String output = executeCommand(command);
+
+   		System.out.println(output);
+   		System.out.println("command exec completed");
+ 
+   		JSONObject data_file = new JSONObject();
+        data_file.put("output", output);
+        return data_file;
+      }
+    
+    @Consumes({"application/xml", "application/json","text/html"})
+   	@Produces({"text/html", "application/json"})
+   	@ResponseStatus(value = HttpStatus.CREATED)
+   	@RequestMapping(value="/renameFile", method = RequestMethod.POST)
+    public  @ResponseBody boolean renameFile(@RequestBody JSONObject o) {
+       	
+    	String oldName = o.get("oldName").toString();
+    	String newName = o.get("newName").toString();
+    	String path = o.get("path").toString();
+    	
+    	
+    	File oldFile = new File(path + File.separator + oldName);
+    	File newFile = new File(path + File.separator + newName);
+    	
+    	boolean status = false;
+
+    	if (!newFile.exists())
+    	{
+    		status = oldFile.renameTo(newFile);
+    	}
+    	
+    	return status;
+      }
     
 //    @RequestMapping("/compile")
 //    public FileObject compileProject(@RequestParam(value="name", defaultValue="World") String name) {
