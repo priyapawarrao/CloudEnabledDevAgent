@@ -10,6 +10,7 @@ import java.nio.file.Files;
 
 import javax.ws.rs.*;
 
+import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
@@ -219,14 +220,25 @@ public class WorkspaceAgentController {
 	@Produces({"text/html", "application/json"})
 	@ResponseStatus(value = HttpStatus.CREATED)
 	@RequestMapping(value="/loadProject", method = RequestMethod.POST)
-    public @ResponseBody String loadProject(@RequestBody JSONObject o) {
+    public @ResponseBody JSONArray loadProject(@RequestBody JSONObject o) {
 
        	String projectName = o.get("projectName").toString();
     	
     	String[] command3 = {"/agentScripts/create_json.sh",projectName};
 		String json = executeCommand(command3);
 	
-    	return json;
+		 JSONParser parser = new JSONParser();
+	        Object obj = null;
+			try {
+				obj = parser.parse(json);
+			} catch (ParseException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+	        JSONArray jsonResult = (JSONArray)obj;
+		
+		
+    	return jsonResult;
     }
     
     @Consumes({"application/xml", "application/json","text/html"})
@@ -317,14 +329,29 @@ public class WorkspaceAgentController {
        	
        	String[] command = {"/agentScripts/mvn_execute.sh",dir};
    		
-   		String output = executeCommand(command);
+       	JSONObject data_file = new JSONObject();
+       	
+       	Thread t = new Thread(){
+       		
+       		
+       		public void run()
+       		{
+       			String output = executeCommand(command);
 
-   		System.out.println(output);
-   		System.out.println("command exec completed");
- 
-   		JSONObject data_file = new JSONObject();
-        data_file.put("output", output);
-        return data_file;
+       	   		System.out.println(output);
+       	   		System.out.println("command exec completed");
+       	 
+       	   		
+       	        data_file.put("output", output);
+       	        
+       			
+       			
+       			
+       		}
+       	};
+       	
+       	return data_file;
+   		
       }
     
     @Consumes({"application/xml", "application/json","text/html"})
