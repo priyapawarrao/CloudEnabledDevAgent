@@ -341,13 +341,14 @@ public class WorkspaceAgentController {
    	@ResponseStatus(value = HttpStatus.CREATED)
    	@RequestMapping(value="/execute", method = RequestMethod.POST)
     public  @ResponseBody JSONObject executeProject(@RequestBody JSONObject o) {
+    	
+    	String projectName = o.get("projectName").toString();
        	
-        String dir = workspaceDir + o.get("projectName").toString();
+        String dir = workspaceDir + projectName;
        	
-       	String[] command = {"/agentScripts/mvn_execute.sh",dir};
+       	String[] command = {"/agentScripts/mvn_execute.sh",dir,projectName};
    		
-       	JSONObject data_file = new JSONObject();
-       	
+       	      	
        	Thread t = new Thread(){
        		
        		
@@ -358,16 +359,28 @@ public class WorkspaceAgentController {
        	   		System.out.println(output);
        	   		System.out.println("command exec completed");
        	 
-       	   		
-       	        data_file.put("output", output);
-       	        
-       			
-       			
-       			
-       		}
+   	        
+       	   }
        	};
        	
-       	return data_file;
+        String contents = null;
+        
+		String logFile = "/agent/logs/" + projectName + "_execute.log";
+		
+		try {
+			contents = FileUtils.readFileToString(new File(logFile), "UTF-8");
+		} catch (IOException e) {
+			
+			e.printStackTrace();
+		}
+
+		
+		JSONObject data_file = new JSONObject();
+        data_file.put("status", contents);
+        return data_file;
+       	
+       	
+ 
    		
       }
     
