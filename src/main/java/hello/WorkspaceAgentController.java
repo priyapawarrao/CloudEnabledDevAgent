@@ -24,6 +24,9 @@ import com.sun.jersey.core.util.Base64;
 @RestController
 public class WorkspaceAgentController {
 	
+	private String workspaceDir = "/agent/workspace/";
+	private String logsDir = "/agent/logs/";
+	
 	@Consumes({"application/xml", "application/json","text/html"})
 	@Produces({"text/html", "application/json"})
 	@RequestMapping(value="/check", method = RequestMethod.GET)
@@ -161,7 +164,7 @@ public class WorkspaceAgentController {
 			e.printStackTrace();
 		}
         
-        String absoluteFilePath = "/agent/workspace" + path + File.separator + name;
+        String absoluteFilePath = workspaceDir + path + File.separator + name;
     	File destFile = new File(absoluteFilePath);
     	
     	try {
@@ -195,10 +198,8 @@ public class WorkspaceAgentController {
     	String path = o.get("path").toString();
     	
     	
-    	String absoluteFilePath = path + File.separator ;
-    	absoluteFilePath = "/agent/workspace/" + path + File.separator + name;
-    	
- 	   	File srcFile = new File(absoluteFilePath);
+    	String absoluteFilePath = workspaceDir + path + File.separator + name;
+    	File srcFile = new File(absoluteFilePath);
     	
     	
 		String content = null;
@@ -254,7 +255,7 @@ public class WorkspaceAgentController {
     	String name = o.get("name").toString();
     	String path = o.get("path").toString();
     	
-    	String absoluteFilePath = path + File.separator + name;
+    	String absoluteFilePath = workspaceDir + path + File.separator + name;
     	
     	File srcFile = new File(absoluteFilePath);
     	
@@ -285,7 +286,7 @@ public class WorkspaceAgentController {
     	String name = o.get("name").toString();
     	String path = o.get("path").toString();
     	
-    	String absoluteFilePath = path + File.separator + name;
+    	String absoluteFilePath = workspaceDir + path + File.separator + name;
     	File directory = new File(absoluteFilePath);
     	
     	if (directory.exists()) {
@@ -310,7 +311,7 @@ public class WorkspaceAgentController {
     	
     	String projectName = o.get("projectName").toString();
     	
-       	String dir = "/agent/workspace/" + projectName;
+       	String dir = workspaceDir + projectName;
     	
     	String[] command = {"/agentScripts/mvn_compile.sh",dir,projectName};
 		
@@ -341,7 +342,7 @@ public class WorkspaceAgentController {
    	@RequestMapping(value="/execute", method = RequestMethod.POST)
     public  @ResponseBody JSONObject executeProject(@RequestBody JSONObject o) {
        	
-        String dir = "/agent/workspace/" + o.get("projectName").toString();
+        String dir = workspaceDir + o.get("projectName").toString();
        	
        	String[] command = {"/agentScripts/mvn_execute.sh",dir};
    		
@@ -381,8 +382,8 @@ public class WorkspaceAgentController {
     	String path = o.get("path").toString();
     	
     	
-    	File oldFile = new File(path + File.separator + oldName);
-    	File newFile = new File(path + File.separator + newName);
+    	File oldFile = new File(workspaceDir + path + File.separator + oldName);
+    	File newFile = new File(workspaceDir + path + File.separator + newName);
     	
     	boolean status = false;
 
