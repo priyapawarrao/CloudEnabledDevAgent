@@ -144,9 +144,9 @@ public class WorkspaceAgentController {
     
     	String status;
     	String name = o.get("name").toString();
+    
     	String content = o.get("content").toString();
     	String path = o.get("path").toString();
-    	String type = o.get("fileType").toString();
     	
     	byte[] bytes = Base64.decode(content);
         File srcFile = new File(name);
@@ -175,11 +175,11 @@ public class WorkspaceAgentController {
 			e.printStackTrace();
 		}
     	
-    	if(type.equalsIgnoreCase("folder"))
+    	/*if(type.equalsIgnoreCase("folder"))
     	{
     		String command = "unzip -o " + path + File.separator + name;
     		String output = executeCommand(command);
-    	}
+    	}*/
     	
     	    	
     	JSONObject obj = new JSONObject();
