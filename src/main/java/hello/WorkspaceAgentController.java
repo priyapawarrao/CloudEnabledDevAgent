@@ -294,6 +294,7 @@ public class WorkspaceAgentController {
         } else {
         	status = directory.mkdir();
         }
+    	
 
     	JSONObject json = new JSONObject();
     	json.put("status", status);
@@ -362,6 +363,13 @@ public class WorkspaceAgentController {
    	        
        	   }
        	};
+       	
+       	try {
+			Thread.sleep(15000);
+		} catch (InterruptedException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
        	
         String contents = null;
         
