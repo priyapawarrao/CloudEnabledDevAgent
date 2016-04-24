@@ -78,6 +78,9 @@ public class WorkspaceAgentController {
 		String command1 = "mkdir -p /agent/workspace";
 		String output1 = executeCommand(command1);
 		
+		String createLogDir = "mkdir /agent/logs";
+		String output_createLogDir = executeCommand(createLogDir);
+		
 		String output;
 			
 		if(empty){
@@ -193,7 +196,7 @@ public class WorkspaceAgentController {
     	
     	
     	String absoluteFilePath = path + File.separator ;
-    	absoluteFilePath = path + File.separator + name;
+    	absoluteFilePath = "/agent/workspace/" + path + File.separator + name;
     	
  	   	File srcFile = new File(absoluteFilePath);
     	
