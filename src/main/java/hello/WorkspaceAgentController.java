@@ -245,7 +245,7 @@ public class WorkspaceAgentController {
    	@Produces({"text/html", "application/json"})
    	@ResponseStatus(value = HttpStatus.CREATED)
    	@RequestMapping(value="/createFile", method = RequestMethod.POST)
-       public @ResponseBody Boolean createFile(@RequestBody JSONObject o) {
+       public @ResponseBody JSONObject createFile(@RequestBody JSONObject o) {
 
     	Boolean status = null;
     	String name = o.get("name").toString();
@@ -266,8 +266,9 @@ public class WorkspaceAgentController {
 				e.printStackTrace();
 			}
         }
-    	
-    	return status;
+    	JSONObject json = new JSONObject();
+    	json.put("status", status);
+        return json;
     	
    }
     
@@ -275,7 +276,7 @@ public class WorkspaceAgentController {
    	@Produces({"text/html", "application/json"})
    	@ResponseStatus(value = HttpStatus.CREATED)
    	@RequestMapping(value="/createFolder", method = RequestMethod.POST)
-       public @ResponseBody Boolean createFolder(@RequestBody JSONObject o) {
+       public @ResponseBody JSONObject createFolder(@RequestBody JSONObject o) {
 
     	Boolean status = null;
     	String name = o.get("name").toString();
@@ -290,8 +291,9 @@ public class WorkspaceAgentController {
         	status = directory.mkdir();
         }
 
-    return status;
-    	
+    	JSONObject json = new JSONObject();
+    	json.put("status", status);
+        return json;
    }
     
     
@@ -358,7 +360,7 @@ public class WorkspaceAgentController {
    	@Produces({"text/html", "application/json"})
    	@ResponseStatus(value = HttpStatus.CREATED)
    	@RequestMapping(value="/renameFile", method = RequestMethod.POST)
-    public  @ResponseBody boolean renameFile(@RequestBody JSONObject o) {
+    public  @ResponseBody JSONObject renameFile(@RequestBody JSONObject o) {
        	
     	String oldName = o.get("oldName").toString();
     	String newName = o.get("newName").toString();
@@ -375,7 +377,9 @@ public class WorkspaceAgentController {
     		status = oldFile.renameTo(newFile);
     	}
     	
-    	return status;
+    	JSONObject json = new JSONObject();
+    	json.put("status", status);
+        return json;
       }
     
 //    @RequestMapping("/compile")
