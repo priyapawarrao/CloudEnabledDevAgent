@@ -161,7 +161,7 @@ public class WorkspaceAgentController {
 			e.printStackTrace();
 		}
         
-        String absoluteFilePath = path + File.separator + name;
+        String absoluteFilePath = "/agent/workspace" + path + File.separator + name;
     	File destFile = new File(absoluteFilePath);
     	
     	try {
@@ -308,19 +308,30 @@ public class WorkspaceAgentController {
 	@RequestMapping(value="/compile", method = RequestMethod.POST)
     public  @ResponseBody JSONObject compileProject(@RequestBody JSONObject o) {
     	
-       	String dir = "/agent/workspace/" + o.get("projectName").toString();
+    	String projectName = o.get("projectName").toString();
     	
-    	String[] command = {"/agentScripts/mvn_compile.sh",dir};
+       	String dir = "/agent/workspace/" + projectName;
+    	
+    	String[] command = {"/agentScripts/mvn_compile.sh",dir,projectName};
 		
 		String output = executeCommand(command);
+		
+		String contents = null;
+		
+		String logFile = "/agent/logs/" + projectName + "_compile.log";
+		
+		try {
+			contents = FileUtils.readFileToString(new File(logFile), "UTF-8");
+		} catch (IOException e) {
+			
+			e.printStackTrace();
+		}
 
 		System.out.println(output);
 		System.out.println("command exec completed");
 		
-		//return output;
-
-    	JSONObject data_file = new JSONObject();
-        data_file.put("output", output);
+		JSONObject data_file = new JSONObject();
+        data_file.put("status", contents);
         return data_file;
    }
     
