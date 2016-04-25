@@ -17,6 +17,13 @@ import org.json.simple.parser.ParseException;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import org.apache.commons.io.*;
+import org.apache.http.HttpResponse;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.StringEntity;
+import org.apache.http.impl.client.BasicResponseHandler;
+import org.apache.http.impl.client.DefaultHttpClient;
 
 import com.sun.jersey.core.util.Base64;
 
@@ -341,21 +348,25 @@ public class WorkspaceAgentController {
    	@Produces({"text/html", "application/json"})
    	@ResponseStatus(value = HttpStatus.CREATED)
    	@RequestMapping(value="/execute", method = RequestMethod.POST)
-    public  @ResponseBody JSONObject executeProject(@RequestBody JSONObject o) {
+    public  @ResponseBody JSONObject executeProject(@RequestBody JSONObject o) throws Exception {
     	
     	String projectName = o.get("projectName").toString();
        	
         String dir = workspaceDir + projectName;
-       	
-       	String[] command = {"/agentScripts/mvn_execute.sh",dir,projectName};
+       	System.out.println("Param1: Dir:--->"+dir);
+    	System.out.println("Param2: projectName:--->"+projectName);
+       //	String[] command = {"/agentScripts/mvn_execute.sh",dir,projectName};
    		
-       	      	
+    	
+    	String command = "/agentScripts/mvn_execute.sh "+dir+" "+projectName;
+    	System.out.println("Command:"+command);
+       	//Executing user application on port 8080	
        	Thread t = new Thread(){
        		
        		
        		public void run()
        		{
-       			String output = executeCommand(command);
+       			String output = executeBashCommand(command);
 
        	   		System.out.println(output);
        	   		System.out.println("command exec completed");
@@ -364,12 +375,43 @@ public class WorkspaceAgentController {
        	   }
        	};
        	
-       	try {
-			Thread.sleep(15000);
-		} catch (InterruptedException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
-		}
+       	t.start();
+       	
+       	//Checking if the user application is up
+       	
+       	@SuppressWarnings("deprecation")
+		HttpClient client = new DefaultHttpClient();
+		
+		String url = "http://localhost:8080/";
+		
+		System.out.println("Url:"+url);
+		
+        HttpGet get = new HttpGet(url);
+		StringEntity input;
+		HttpResponse response = null;
+       	
+		String responseString="";
+       	
+       	
+       	int count = 0;
+        int maxTries = 10;
+        while(true) {
+            try {
+                Thread.sleep(8000);
+                System.out.println("Connecting to user application on port 8080");
+                response = client.execute(get);
+                System.out.println("Response Code : " 
+                        + response.getStatusLine().getStatusCode());
+                break;
+            } catch (Exception e) {
+            	
+                if (++count == maxTries) throw e;
+                System.out.println("Retry:"+count);
+            }
+        }
+       	
+       	
+       	
        	
         String contents = null;
         
@@ -523,4 +565,57 @@ public class WorkspaceAgentController {
         byte[] bytes = Files.readAllBytes(file.toPath());   
         return new String(Base64.encode(bytes));
     }
+    
+    
+    
+    
+    
+    
+    
+    
+    //executeBashCommand
+    String executeBashCommand(String command) {
+
+  		StringBuffer output = new StringBuffer();
+
+  		Process p;
+  		try {
+  			p = Runtime.getRuntime().exec(new String[] { "bash", "-c", command });
+  			p.waitFor();
+  			BufferedReader reader = new BufferedReader(new InputStreamReader(p.getInputStream()));
+  			
+  			String line = "";			
+  			while ((line = reader.readLine())!= null) {
+  				output.append(line + "\n");
+  			}
+  			
+  			 BufferedReader readErrorProc=new BufferedReader(new InputStreamReader(p.getErrorStream()));
+  		      while(readErrorProc.ready()) {
+  		        String output1 = readErrorProc.readLine();
+  		        System.out.println(output1);
+  		      }
+
+  		} catch (Exception e) {
+  			e.printStackTrace();
+  		}
+  		return output.toString();
+    }
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
 }
