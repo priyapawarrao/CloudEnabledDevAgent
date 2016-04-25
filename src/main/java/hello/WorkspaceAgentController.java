@@ -269,6 +269,7 @@ public class WorkspaceAgentController {
     	
     	if (srcFile.exists()) {
             System.out.println("File already exists");
+            status = false;
         } else {
         	try {
 				status = srcFile.createNewFile();
@@ -362,7 +363,7 @@ public class WorkspaceAgentController {
     	
     	if (directory.exists()) {
             System.out.println("Folder exists, deleting dir: " + directory);
-            
+            status = false;
         } else {
         	status = directory.mkdir();
         }
