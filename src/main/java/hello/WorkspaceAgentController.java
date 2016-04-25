@@ -308,7 +308,7 @@ public class WorkspaceAgentController {
         }
     	
     	   	
-    	// status True --> File deleted, False --> File doesn't exist, Null --> unsuccessful Try again
+    	// status True --> File deleted, False --> File doesn't exist , null --> unsuccessful deletion
     	JSONObject json = new JSONObject();
     	json.put("status", status);
         return json;
@@ -318,8 +318,8 @@ public class WorkspaceAgentController {
     @Consumes({"application/xml", "application/json","text/html"})
    	@Produces({"text/html", "application/json"})
    	@ResponseStatus(value = HttpStatus.CREATED)
-   	@RequestMapping(value="/createFolder", method = RequestMethod.POST)
-       public @ResponseBody JSONObject createFolder(@RequestBody JSONObject o) {
+   	@RequestMapping(value="/deleteFolder", method = RequestMethod.POST)
+       public @ResponseBody JSONObject deleteFolder(@RequestBody JSONObject o) {
 
     	Boolean status = null;
     	String name = o.get("name").toString();
@@ -341,7 +341,7 @@ public class WorkspaceAgentController {
         	status = false;
         }
     	
-    	// status True --> successful deletion, false --> doesnt exist, null --> unsuccessful deletion try again
+    	// status True --> successful deletion, false --> doesn't exist, null --> unsuccessful deletion
     	JSONObject json = new JSONObject();
     	json.put("status", status);
         return json;
@@ -350,8 +350,8 @@ public class WorkspaceAgentController {
     @Consumes({"application/xml", "application/json","text/html"})
    	@Produces({"text/html", "application/json"})
    	@ResponseStatus(value = HttpStatus.CREATED)
-   	@RequestMapping(value="/deleteFolder", method = RequestMethod.POST)
-       public @ResponseBody JSONObject deleteFolder(@RequestBody JSONObject o) {
+   	@RequestMapping(value="/createFolder", method = RequestMethod.POST)
+       public @ResponseBody JSONObject createFolder(@RequestBody JSONObject o) {
 
     	Boolean status = null;
     	String name = o.get("name").toString();
