@@ -283,6 +283,38 @@ public class WorkspaceAgentController {
     	
    }
     
+    
+    @Consumes({"application/xml", "application/json","text/html"})
+   	@Produces({"text/html", "application/json"})
+   	@ResponseStatus(value = HttpStatus.CREATED)
+   	@RequestMapping(value="/deleteFile", method = RequestMethod.POST)
+       public @ResponseBody JSONObject deleteFile(@RequestBody JSONObject o) {
+
+    	Boolean status = null;
+    	String name = o.get("name").toString();
+    	String path = o.get("path").toString();
+    	
+    	String absoluteFilePath = workspaceDir + path + File.separator + name;
+    	
+    	File srcFile = new File(absoluteFilePath);
+    	
+    	
+    	if (srcFile.exists()) {
+            System.out.println("File exists: deleting file" + srcFile);
+            status = srcFile.delete();
+        } else {
+        	System.out.println("File doesnt exist");
+        	status = false;
+        }
+    	
+    	   	
+    	// status True --> File deleted, False --> File doesn't exist, Null --> unsuccessful Try again
+    	JSONObject json = new JSONObject();
+    	json.put("status", status);
+        return json;
+    	
+   }
+    
     @Consumes({"application/xml", "application/json","text/html"})
    	@Produces({"text/html", "application/json"})
    	@ResponseStatus(value = HttpStatus.CREATED)
@@ -298,6 +330,39 @@ public class WorkspaceAgentController {
     	
     	if (directory.exists()) {
             System.out.println("Folder already exists");
+            try {
+				FileUtils.deleteDirectory(directory);
+				status = true;
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+        } else {
+        	status = false;
+        }
+    	
+    	// status True --> successful deletion, false --> doesnt exist, null --> unsuccessful deletion try again
+    	JSONObject json = new JSONObject();
+    	json.put("status", status);
+        return json;
+   }
+    
+    @Consumes({"application/xml", "application/json","text/html"})
+   	@Produces({"text/html", "application/json"})
+   	@ResponseStatus(value = HttpStatus.CREATED)
+   	@RequestMapping(value="/deleteFolder", method = RequestMethod.POST)
+       public @ResponseBody JSONObject deleteFolder(@RequestBody JSONObject o) {
+
+    	Boolean status = null;
+    	String name = o.get("name").toString();
+    	String path = o.get("path").toString();
+    	
+    	String absoluteFilePath = workspaceDir + path + File.separator + name;
+    	File directory = new File(absoluteFilePath);
+    	
+    	if (directory.exists()) {
+            System.out.println("Folder exists, deleting dir: " + directory);
+            
         } else {
         	status = directory.mkdir();
         }
