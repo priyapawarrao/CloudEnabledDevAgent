@@ -17,6 +17,7 @@ import org.json.simple.parser.ParseException;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import org.apache.commons.io.*;
+import org.apache.commons.io.FileUtils;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
@@ -109,36 +110,7 @@ public class WorkspaceAgentController {
 		
 		System.out.println("JSON string format: " + json);
 		
-//		JSONParser parser = new JSONParser();
-//		JSONObject json = null;
-//		try {
-//			json = (JSONObject) parser.parse(output3);
-//		} catch (ParseException e1) {
-//			// TODO Auto-generated catch block
-//			e1.printStackTrace();
-//		}
-		
-//		String absoluteFilePath = "/agent/workspace" + File.separator + artifactId + ".json";
-//		File srcFile = new File(absoluteFilePath);
-//    	
-//    	
-//		String content = null;
-//		try {
-//			content = convertFileToString(srcFile);
-//		} catch (IOException e) {
-//			// TODO Auto-generated catch block
-//			e.printStackTrace();
-//		}
-//		
-//		
-//    	JSONObject data_file = new JSONObject();
-//        //data_file.put("create_folder_struc", output);
-////        data_file.put("zip_file_content", content);
-////        return data_file;
-        
-//		JSONObject json = new JSONObject();
-//		json.put("JSON", output3);
-		
+	
 		return json;
    }
 
@@ -519,6 +491,75 @@ public class WorkspaceAgentController {
     	if (!newFile.exists())
     	{
     		status = oldFile.renameTo(newFile);
+    	}
+    	
+    	JSONObject json = new JSONObject();
+    	json.put("status", status);
+        return json;
+      }
+    
+    @Consumes({"application/xml", "application/json","text/html"})
+   	@Produces({"text/html", "application/json"})
+   	@ResponseStatus(value = HttpStatus.CREATED)
+   	@RequestMapping(value="/moveFile", method = RequestMethod.POST)
+    public  @ResponseBody JSONObject moveFile(@RequestBody JSONObject o) {
+       	
+    	String oldPath = o.get("oldPath").toString();
+    	String newPath = o.get("newPath").toString();
+    	String fileName = o.get("fileName").toString();
+    	
+    	
+    	File sourceFile = new File(workspaceDir + oldPath + File.separator + fileName);
+		File destinationFile = new File(workspaceDir + newPath + File.separator + fileName);
+
+		  	
+    	Boolean status = null;
+
+    	if (sourceFile.exists())
+    	{
+    		try {
+				FileUtils.moveFile(sourceFile, destinationFile);
+				status = true;
+			} catch (IOException e) {
+				status = false;
+				e.printStackTrace();
+			}
+    		
+    	}
+    	
+    	JSONObject json = new JSONObject();
+    	json.put("status", status);
+        return json;
+      }
+    
+    
+    @Consumes({"application/xml", "application/json","text/html"})
+   	@Produces({"text/html", "application/json"})
+   	@ResponseStatus(value = HttpStatus.CREATED)
+   	@RequestMapping(value="/moveFolder", method = RequestMethod.POST)
+    public  @ResponseBody JSONObject moveFolder(@RequestBody JSONObject o) {
+       	
+    	String oldPath = o.get("oldPath").toString();
+    	String newPath = o.get("newPath").toString();
+    	String dirName = o.get("dirName").toString();
+    	
+    	
+    	File sourceDir = new File(workspaceDir + oldPath + File.separator + dirName);
+		File destinationDir = new File(workspaceDir + newPath + File.separator + dirName);
+
+		  	
+    	Boolean status = null;
+
+    	if (sourceDir.exists())
+    	{
+    		try {
+				FileUtils.moveDirectory(sourceDir, destinationDir);
+				status = true;
+			} catch (IOException e) {
+				status = false;
+				e.printStackTrace();
+			}
+    		
     	}
     	
     	JSONObject json = new JSONObject();
