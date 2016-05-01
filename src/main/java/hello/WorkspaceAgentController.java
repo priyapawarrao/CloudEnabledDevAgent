@@ -567,6 +567,127 @@ public class WorkspaceAgentController {
         return json;
       }
     
+    @Consumes({"application/xml", "application/json","text/html"})
+   	@Produces({"text/html", "application/json"})
+   	@ResponseStatus(value = HttpStatus.CREATED)
+   	@RequestMapping(value="/copyFolder", method = RequestMethod.POST)
+    public  @ResponseBody JSONObject copyFolder(@RequestBody JSONObject o) {
+       	
+    	String oldPath = o.get("oldPath").toString();
+    	String newPath = o.get("newPath").toString();
+    	String dirName = o.get("dirName").toString();
+    	
+    	
+    	File sourceDir = new File(workspaceDir + oldPath + File.separator + dirName);
+		File destinationDir = new File(workspaceDir + newPath + File.separator + dirName);
+
+		  	
+    	Boolean status = null;
+
+    	if (sourceDir.exists())
+    	{
+    		try {
+    			FileUtils.copyDirectory(sourceDir, destinationDir);
+				status = true;
+			} catch (IOException e) {
+				status = false;
+				e.printStackTrace();
+			}
+    		
+    	}
+    	
+    	JSONObject json = new JSONObject();
+    	json.put("status", status);
+        return json;
+      }
+    
+    
+    @Consumes({"application/xml", "application/json","text/html"})
+   	@Produces({"text/html", "application/json"})
+   	@ResponseStatus(value = HttpStatus.CREATED)
+   	@RequestMapping(value="/copyFile", method = RequestMethod.POST)
+    public  @ResponseBody JSONObject copyFile(@RequestBody JSONObject o) {
+       	
+    	String oldPath = o.get("oldPath").toString();
+    	String newPath = o.get("newPath").toString();
+    	String fileName = o.get("fileName").toString();
+    	
+    	
+    	File sourceFile = new File(workspaceDir + oldPath + File.separator + fileName);
+		File destinationFile = new File(workspaceDir + newPath + File.separator + fileName);
+
+		  	
+    	Boolean status = null;
+
+    	if (sourceFile.exists())
+    	{
+    		try {
+    			FileUtils.copyFile(sourceFile, destinationFile);
+    			
+				status = true;
+			} catch (IOException e) {
+				status = false;
+				e.printStackTrace();
+			}
+    		
+    	}
+    	
+    	JSONObject json = new JSONObject();
+    	json.put("status", status);
+        return json;
+      
+      }
+    
+    @Consumes({"application/xml", "application/json","text/html"})
+   	@Produces({"text/html", "application/json"})
+   	@ResponseStatus(value = HttpStatus.CREATED)
+   	@RequestMapping(value="/download", method = RequestMethod.POST)
+    public  @ResponseBody JSONObject dowload(@RequestBody JSONObject o) {
+       	
+    	String name = o.get("name").toString();
+    	String path = o.get("path").toString();
+    	//String type = o.get("type").toString();
+    	
+    	
+    	File sourceFile = new File(workspaceDir + path + File.separator + name);
+    	File destFile = new File(workspaceDir + File.separator + "download.zip");
+    	Boolean status = null;
+    	String command;
+    	
+    	if(sourceFile.exists()){
+	    	if (sourceFile.isDirectory())
+	    	{
+	    		//command = "zip -r " + "download.zip " + actualPath;
+	    		String[] command2 = {"/agentScripts/download_zip.sh","1",path,name};
+				String output = executeCommand(command2);
+				status = true;
+	    		
+	    	}else{
+	    		//command = "zip " + "download.zip " + actualPath;
+	    		String[] command2 = {"/agentScripts/download_zip.sh","2",path,name};
+				String output = executeCommand(command2);
+				status = true;
+	    	}
+    	}
+    	
+    	String content = null;
+		try {
+			content = convertFileToString(destFile);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		//command = "rm -rf " + workspaceDir + File.separator + "download.zip";
+    	
+        JSONObject data_file = new JSONObject();
+        data_file.put("name", name);
+        data_file.put("path", path);
+        data_file.put("content", content);
+    	
+        return data_file;
+   }
+    
 //    @RequestMapping("/compile")
 //    public FileObject compileProject(@RequestParam(value="name", defaultValue="World") String name) {
 //        return new FileObject(counter.incrementAndGet(),String.format(template, name));
