@@ -7,8 +7,16 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.file.Files;
+import java.nio.file.LinkOption;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.attribute.BasicFileAttributeView;
+import java.nio.file.attribute.BasicFileAttributes;
 
-import javax.ws.rs.*;
+import javax.ws.rs.Consumes;
+import javax.ws.rs.Produces;
+
+//import javax.ws.rs.*;
 
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -650,7 +658,7 @@ public class WorkspaceAgentController {
     	
     	
     	File sourceFile = new File(workspaceDir + path + File.separator + name);
-    	File destFile = new File(workspaceDir + File.separator + "download.zip");
+    	
     	Boolean status = null;
     	String command;
     	
@@ -670,6 +678,8 @@ public class WorkspaceAgentController {
 	    	}
     	}
     	
+    	File destFile = new File(File.separator + "download.zip");
+    	
     	String content = null;
 		try {
 			content = convertFileToString(destFile);
@@ -678,7 +688,66 @@ public class WorkspaceAgentController {
 			e.printStackTrace();
 		}
 		
-		//command = "rm -rf " + workspaceDir + File.separator + "download.zip";
+		command = "rm -rf " + File.separator + "download.zip";
+		String output1 = executeCommand(command);
+    	
+        JSONObject data_file = new JSONObject();
+        data_file.put("name", name);
+        data_file.put("path", path);
+        data_file.put("content", content);
+    	
+        return data_file;
+   }
+    
+    
+    @Consumes({"application/xml", "application/json","text/html"})
+   	@Produces({"text/html", "application/json"})
+   	@ResponseStatus(value = HttpStatus.CREATED)
+   	@RequestMapping(value="/getProperties", method = RequestMethod.POST)
+    public  @ResponseBody JSONObject getProperties(@RequestBody JSONObject o) {
+       	
+    	String name = o.get("name").toString();
+    	String path = o.get("path").toString();
+    	//String type = o.get("type").toString();
+    	
+    	
+    	File sourceFile = new File(workspaceDir + path + File.separator + name);
+    	
+    	Path file = Paths.get(workspaceDir + path + File.separator + name);
+    	
+    	
+    	
+    	Boolean status = null;
+    	String command;
+    	
+    	if(sourceFile.exists()){
+    		
+    		 BasicFileAttributeView bfv = Files.getFileAttributeView(file,BasicFileAttributeView.class);
+    		 try {
+				BasicFileAttributes bfa = bfv.readAttributes();
+				BasicFileAttributes attr = Files.readAttributes(file, BasicFileAttributes.class);
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+    		
+    		
+    		
+    		
+    	}
+    	
+    	File destFile = new File(File.separator + "download.zip");
+    	
+    	String content = null;
+		try {
+			content = convertFileToString(destFile);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		command = "rm -rf " + File.separator + "download.zip";
+		String output1 = executeCommand(command);
     	
         JSONObject data_file = new JSONObject();
         data_file.put("name", name);
