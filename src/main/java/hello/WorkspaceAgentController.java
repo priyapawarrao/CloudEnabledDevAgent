@@ -903,9 +903,30 @@ public class WorkspaceAgentController {
     
     
     
-    
-    
-    
+    @Consumes({"application/xml", "application/json","text/html"})
+   	@Produces({"text/html", "application/json"})
+   	@ResponseStatus(value = HttpStatus.CREATED)
+   	@RequestMapping(value="/stop", method = RequestMethod.POST)
+    public  @ResponseBody JSONObject stopProject(@RequestBody JSONObject o) throws Exception {
+    	
+    	String projectName = o.get("projectName").toString();
+       	
+        String dir = workspaceDir + projectName;
+       	System.out.println("Param1: Dir:--->"+dir);
+    	System.out.println("Param2: projectName:--->"+projectName);
+       //	String[] command = {"/agentScripts/mvn_execute.sh",dir,projectName};
+   		
+    	
+    	String command = "/agentScripts/mvn_stop.sh "+dir+" "+projectName;
+    	System.out.println("Command:"+command);
+       	//Executing user application on port 8080	
+       			String output = executeBashCommand(command);
+
+
+       			JSONObject data_file = new JSONObject();
+       	        data_file.put("status", "stopped");
+       	        return data_file;
+    }
     
     
     
