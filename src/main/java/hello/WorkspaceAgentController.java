@@ -12,6 +12,8 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.attribute.BasicFileAttributeView;
 import java.nio.file.attribute.BasicFileAttributes;
+import java.nio.file.attribute.PosixFileAttributes;
+import java.nio.file.attribute.PosixFilePermissions;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.Produces;
@@ -709,16 +711,15 @@ public class WorkspaceAgentController {
     	String name = o.get("name").toString();
     	String path = o.get("path").toString();
     	//String type = o.get("type").toString();
-    	
-    	
+    	    	
     	File sourceFile = new File(workspaceDir + path + File.separator + name);
-    	
     	Path file = Paths.get(workspaceDir + path + File.separator + name);
-    	
-    	
     	
     	Boolean status = null;
     	String command;
+    	
+    	JSONObject json = new JSONObject();
+          
     	
     	if(sourceFile.exists()){
     		
@@ -726,35 +727,38 @@ public class WorkspaceAgentController {
     		 try {
 				BasicFileAttributes bfa = bfv.readAttributes();
 				BasicFileAttributes attr = Files.readAttributes(file, BasicFileAttributes.class);
+				PosixFileAttributes permAttr = Files.readAttributes(file, PosixFileAttributes.class);
+				System.out.format("%s %s %s%n",
+					    permAttr.owner().getName(),
+					    permAttr.group().getName(),
+					    PosixFilePermissions.toString(permAttr.permissions()));
+				json.put("name", name);
+				json.put("path", workspaceDir + path + File.separator);
+				if(attr.isDirectory()){
+					json.put("fileType", "directory");
+				}else{
+					json.put("fileType", "file");
+				}
+				
+				json.put("creationTime", attr.creationTime().toString());
+				json.put("modifiedTime", attr.lastModifiedTime().toString());
+				json.put("size", attr.size());
+				json.put("owner", permAttr.owner().getName());
+				json.put("group", permAttr.group().getName());
+				json.put("filePermissions", PosixFilePermissions.toString(permAttr.permissions()));
+				json.put("status", "success");
+				
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
+				json.put("status", "fail");
 			}
-    		
-    		
-    		
-    		
+    		 		
     	}
     	
-    	File destFile = new File(File.separator + "download.zip");
-    	
-    	String content = null;
-		try {
-			content = convertFileToString(destFile);
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		
-		command = "rm -rf " + File.separator + "download.zip";
-		String output1 = executeCommand(command);
-    	
-        JSONObject data_file = new JSONObject();
-        data_file.put("name", name);
-        data_file.put("path", path);
-        data_file.put("content", content);
-    	
-        return data_file;
+    
+        
+        return json;
    }
     
 //    @RequestMapping("/compile")
