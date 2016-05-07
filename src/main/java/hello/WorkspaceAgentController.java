@@ -933,7 +933,34 @@ public class WorkspaceAgentController {
     }
     
     
-    
+  //openStreamChannel
+  	@RequestMapping(value="/openStreamChannel",method = RequestMethod.POST, consumes =
+      	    "application/json" , produces = "application/json")
+      @ResponseStatus(HttpStatus.CREATED)
+      @ResponseBody
+
+      public JSONObject openStreamChannel(@RequestBody JSONObject o ) {
+       
+  		
+  		System.out.println("Start streaming");
+        String logFile;
+        String goal = o.get("goal").toString();
+        if(goal.equalsIgnoreCase("execute")){
+      	  logFile = "/agent/logs/*_execute.log";
+        }else
+      	  logFile = "/agent/logs/*_compile.log";
+        String nc = "nohup tail -F "+ logFile +"|nc -lp 7777 &";
+    	
+    	
+       	//Executing user application on port 8080	
+       	String result = executeBashCommand(nc);
+
+       	System.out.println("End streaming");
+		JSONObject data_file = new JSONObject();
+        data_file.put("status", "streaming");
+        return data_file;
+  	
+  	}
     
     
     
